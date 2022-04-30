@@ -2,6 +2,18 @@ import java.util.*;
 
 
 public class CNsimulatorForIqraMaam {
+
+  public static class device {
+    int mac;
+    String data;
+    public void setmac(int k) {
+      this.mac = k;
+
+    }
+    public void setdata(String k) {
+      this.data = k;
+    }
+  }
    public static void main(String [] args) {
     @SuppressWarnings("resource")
     Scanner s = new Scanner(System.in);
