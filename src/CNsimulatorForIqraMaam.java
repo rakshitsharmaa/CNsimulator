@@ -14,6 +14,18 @@ public class CNsimulatorForIqraMaam {
       this.data = k;
     }
   }
+
+   public static class hub {
+    String data;
+    int mac;
+    public device A, B, C, D, E;
+    public hub() {
+      data = "0";
+      mac = 0;
+
+    }
+
+    
    public static void main(String [] args) {
     @SuppressWarnings("resource")
     Scanner s = new Scanner(System.in);
