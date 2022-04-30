@@ -141,6 +141,120 @@ public class CNsimulatorForIqraMaam {
     }
   }
 
+   public static void broadcast(int sender, int receiver, String d, device[] dev, int devices) {
+    for (int i = 0; i < devices; i++) {
+      if (sender - 1 == i)
+        continue;
+      for (int j = 0; j < d.length(); j++) {
+        long starttime = System.currentTimeMillis();
+        System.out.println("The sender " + sender + " sends frame no " + (j + 1) + " to the receiver " + (i + 1));
+        dev[i] = new device();
+        if (i == receiver - 1) {
+          int k = errorControl(j);
+          if (k == j) {
+            System.out.println("The receiver " + (i + 1) + " discard frame no " + (j + 1) + "and send an ack " + (j + 1));
+            j--;
+
+          } else {
+            dev[i].data += d.charAt(j);
+            System.out.println("The receiver " + (i + 1) + " receives frame no " + (j + 1) + " containing data " + d.charAt(j) + " successfully "
+                               + "and send an ack " + (j + 2));
+            System.out.println("The sender " + sender + " receives the ack ");
+
+          }
+        } else {
+          System.out.println("The receiver " + (i + 1) + " discard the data");
+
+        }
+        long endtime = System.currentTimeMillis();
+        System.out.println("RoundTrip Time :" + (endtime - starttime) + "ms \n");
+
+
+
+      }
+
+    }
+    System.out.println("Broadcast domain = 1 \nCollision Domain = " + devices);
+  }
+  public static void broadcast2(int sender, int receiver, String d, device[] dev, int devices) {
+    boolean flag = false;
+    int size = 4;
+    int k = 1;
+    int upto = 0;
+    long start = System.currentTimeMillis();
+    for (int i = 0; i < devices; i++) {
+      if (sender - 1 == i)
+        continue;
+
+      for (int j = 0; j < d.length() || (i == receiver - 1 && upto < d.length()); j++) {
+        long starttime = System.currentTimeMillis();
+        if (k != size && j < d.length())
+          System.out.println("The sender " + sender + " sends frame no " + (j + 1) + " to the receiver " + (i + 1));
+
+
+        dev[i] = new device();
+        if (i == receiver - 1) {
+          if (j < d.length() && flag && k < size) {
+            System.out.println("The receiver " + (i + 1) + " discard frame no " + (j + 1) + "and send an ack " + upto);
+            System.out.println("The sender " + sender + " receives the ack \n");
+            k++;
+          } else if (flag && ( k == size || j >= d.length())) {
+            flag = false;
+            j = upto;
+            k = 1;
+            System.out.println("The sender " + sender + " sends frame no " + (j + 1) + " to the receiver " + (i + 1));
+          }
+          if (j == upto) {
+            int k1 = errorControl(j);
+            if (k1 == j) {
+              if (!flag) {
+                flag = true;
+                k++;
+                upto = k1;
+
+              }
+              System.out.println("The receiver " + (i + 1) + " discard frame no " + (j + 1) + " and send an ack " + upto);
+              System.out.println("The sender " + sender + " receives the ack \n");
+
+            }
+          }
+
+          if (!flag) {
+            dev[i].data += d.charAt(j);
+            System.out.println("The receiver " + (i + 1) + " receives frame no " + (j + 1) + " containing data " + d.charAt(j) + " successfully "
+                               + "and send an ack " + (++upto));
+            System.out.println("The sender " + sender + " receives the ack ");
+
+          }
+
+        } else {
+          System.out.println("The receiver " + (i + 1) + " discard the data");
+
+        }
+        long endtime = System.currentTimeMillis();
+        System.out.println("RoundTrip Time :" + (endtime - starttime) + "ms \n");
+
+
+
+      }
+      if (System.currentTimeMillis() - start > 50) {
+        System.out.println("time out occured please restart transmission");
+        break;
+      }
+
+    }
+    System.out.println("Broadcast domain = 1 \nCollision Domain = " + devices);
+  }
+  public  static int errorControl(int k) {
+    Random p = new Random();
+    int rand = p.nextInt(100);
+    if (rand <= 80)
+      return k + 1;
+    else
+      return k;
+
+  }
+
    public static void main(String [] args) {
     @SuppressWarnings("resource")
     Scanner s = new Scanner(System.in);
