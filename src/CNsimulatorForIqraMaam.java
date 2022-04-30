@@ -254,6 +254,181 @@ public class CNsimulatorForIqraMaam {
       return k;
 
   }
+  static void transmission2(int sender, int receiver, String d, int bridge, int devices, int h1) {
+    device[] dev = new device[devices];
+    if (bridge == 1) {
+      System.out.println("The Switch forwards the data 1st time ");
+      for (int i = 0; i < devices; i++) {
+        dev[i] = new device();
+        dev[i].setmac(i + 10);
+
+      }
+      broadcast(sender, receiver, d, dev, devices);
+    } else {
+      if (sender <= h1 && receiver <= h1) {
+        System.out.println("\nThe switch denied to pass the packet from Hub 1 to Hub 2");
+        for (int p = 0; p < h1; p++) {
+          if (sender == p + 1) continue;
+
+
+
+          for (int j = 0; j < d.length(); j++) {
+            long startTime = System.currentTimeMillis();
+            System.out.println("\nThe Sender " + sender + " sends frame no. " + (j + 1) + " to the receiver " + (p + 1));
+
+            if (p == receiver - 1) {
+              int k = errorControl(j);
+              if (k == j) {
+                System.out.println("The receiver " + (p + 1) + " discard frame no " + (j + 1) + "and send an ack " + (j + 1));
+                j--;
+
+              } else {
+                dev[p] = new device();
+                dev[p].data += d.charAt(j);
+                System.out.println("\nThe Receiver " + (p + 1) + " receives frame no. " + (j + 1) + " containing the data " + d.charAt(j) + " and sends back ack " + (j + 2));
+                System.out.println("\n The sender " + sender + " receives the ack \n\n\n");
+              }
+            }
+
+            else {
+              System.out.println("\nReceievr Discarded the info \n");
+
+              long endTime = System.currentTimeMillis();
+              long durationInNano = (endTime - startTime);
+              System.out.println("Roundtrip Time: " + durationInNano + " ms \n ");
+            }
+          }
+
+        }
+        System.out.println("Broadcast domain = 1 \nCollision domain = 2");
+      } else if (sender > h1 && receiver > h1) {
+        System.out.println("\nThe switch denied to pass the packet from Hub 2 to Hub 1");
+        for (int p = h1; p < devices; p++) {
+          if (sender == p + 1) continue;
+
+          //broadCast(data,sender,receiver,d,device);
+
+          for (int i = 0; i < d.length(); i++) {
+            long startTime = System.currentTimeMillis();
+
+            System.out.println("\nThe Sender " + sender + " sends frame no. " + (i + 1) + " to the receiver " + (p + 1));
+
+            if (p == receiver - 1) {
+              dev[p] = new device() ;
+              dev[p].data += d.charAt(i);
+              System.out.println("\nThe Receiver " + (p + 1) + " receives frame no. " + (i + 1) + " containing the data " + d.charAt(i) + " and sends back ack ");
+              System.out.println("\n The sender " + sender + " receives the ack \n\n\n");
+            } else
+              System.out.println("Receiver Discarded the info");
+
+            long endTime = System.currentTimeMillis();
+            long durationInNano = (endTime - startTime);
+            System.out.println("Roundtrip Time: " + durationInNano + " ms \n");
+
+          }
+
+        }
+        System.out.println("Broadcast domain = 1 \nCollision domain = 2");
+      } else broadcast(sender, receiver, d, dev, devices);
+    }
+  }
+  public static void transmission(int sender, int receiver, String d, int bridge, int devices) {
+    device dev[] = new device[devices];
+    boolean flag = false;
+    int size = 4;
+    int k = 1;
+    int upto = 0;
+    if (bridge == 1) {
+      for (int i = 0; i < devices; i++) {
+        dev[i] = new device();
+        dev[i].setmac(i + 10);
+
+      }
+      broadcast2(sender, receiver, d, dev, devices);
+    } else {
+
+
+      for (int i = 0; i < devices; i++) {
+        if (receiver - 1 == i) {
+          long start = System.currentTimeMillis();
+          for (int j = 0; j < d.length() || upto < d.length(); j++) {
+
+
+
+            long starttime = System.currentTimeMillis();
+            if (k != size && j < d.length())
+              System.out.println("The sender " + sender + " sends frame no " + (j + 1) + " to the receiver " + (i + 1));
+
+
+            dev[i] = new device();
+            if (i == receiver - 1) {
+              if (j < d.length() && flag && k < size) {
+                System.out.println("The receiver " + (i + 1) + " discard frame no " + (j + 1) + "and send an ack " + upto);
+                System.out.println("The sender " + sender + " receives the ack \n");
+                k++;
+              } else if (flag && (k == size || j >= d.length())) {
+                flag = false;
+                j = upto;
+                k = 1;
+                System.out.println("The sender " + sender + " sends frame no " + (j + 1) + " to the receiver " + (i + 1));
+              }
+              if (j == upto) {
+                int k1 = errorControl(j);
+                if (k1 == j) {
+                  if (!flag) {
+                    flag = true;
+                    k++;
+                    upto = k1;
+
+                  }
+                  System.out.println("The receiver " + (i + 1) + " discard frame no " + (j + 1) + "and send an ack " + upto);
+                  System.out.println("The sender " + sender + " receives the ack \n");
+
+                }
+              }
+
+              if (!flag) {
+                dev[i].data += d.charAt(j);
+                System.out.println("The receiver " + (i + 1) + " receives frame no " + (j + 1) + " containing data " + d.charAt(j) + " successfully "
+                                   + "and send an ack " + (++upto));
+                System.out.println("The sender " + sender + " receives the ack \n");
+
+              }
+
+            } else {
+              System.out.println("The receiver " + (i + 1) + " discard the data");
+
+
+            }
+            long endtime = System.currentTimeMillis();
+            System.out.println("RoundTrip Time :" + (endtime - starttime) + "ms \n");
+
+
+            if (System.currentTimeMillis() - start > 50) {
+              System.out.println("time out occured please restart transmission");
+              break;
+            }
+          }
+        }
+      }
+
+      System.out.println("Broadcast domain = 1 \nCollision Domain = " + devices);
+    }
+  }
+  public static void huback(char se, char r, int device) {
+    for (int i = 0; i < device; i++) {
+      char k = (char)(65 + i);
+      if (se == (65 + i))
+        continue;
+
+      else if (r == 65 + i)
+        System.out.println("ACK accepted by the receiver " + r);
+      else
+        System.out.println("ACK discard by the receiver " + k);
+
+    }
+  }
+
 
    public static void main(String [] args) {
     @SuppressWarnings("resource")
